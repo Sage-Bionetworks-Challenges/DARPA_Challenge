@@ -58,7 +58,7 @@ def validate(submission, template_location, key):
     return(True)
 
 
-def score_1_2:
+def score_1_2(submission, template_location, key):
     return(dict(),"Test")
 
 def score_3(submission, template_location, key):
