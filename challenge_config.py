@@ -56,7 +56,7 @@ def validate(submission, goldstandard, key):
     assert sum(submission[challenge[key]].isnull())==0, 'NA values are not allowed'
 
     #CHECK: submissions must be all NA
-    assert submission['SHEDDING_SC1'].dtype == 'float64' or submission['SHEDDING_SC1'].dtype == 'int64','Submissions must be numerical values'
+    assert submission[challenge[key]].dtype == 'float64' or submission[challenge[key]].dtype == 'int64','Submissions must be numerical values'
     return(True)
 
 
