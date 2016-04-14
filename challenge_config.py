@@ -6,7 +6,8 @@
 import os
 import pandas as pd
 import numpy as np
-
+import sklearn
+from sklearn.metrics import auc
 ## A Synapse project will hold the assetts for your challenge. Put its
 ## synapse ID here, for example
 ## CHALLENGE_SYN_ID = "syn1234567"
@@ -152,12 +153,14 @@ def score_1_2(submission, goldstandard, key):
     sub_stats = grouped.apply(__nonlinear_interpolated_evalStats,blockWise_stats)
     
     precision, recall,  fpr, threshold = sub_stats.precision, sub_stats.recall, sub_stats.fpr, sub_stats.predict 
-    print precision
-    print recall
-    print fpr
-    print threshold
-    return(dict(precision = precision, recall = recall, fpr = fpr, threshold = threshold),
-            "Your submission is scored!")
+    tpr = recall #(Recall and True positive rates are same)
+    roc_auc = auc(fpr,tpr,reorder=True)
+    #PR curve AUC
+    PR_auc = auc(recall, precision,reorder=True)
+    results = (roc_auc, PR_auc)
+    results = [ round(x,4) for x in results]
+    return(dict(AUROC = results[0], AUPR = results[1]),
+            "AUROC: %.2f\nAUPR: %.2f" % (results[0],results[1]))
 
 def score_3(submission, goldstandard, key):
     goldstandard = pd.read_csv(goldstandard)
