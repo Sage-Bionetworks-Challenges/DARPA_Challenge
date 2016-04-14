@@ -32,9 +32,9 @@ ADMIN_USER_IDS = ["3324230"]
 ## Configuring them here as a list will save a round-trip to the server
 ## every time the script starts.
 
-def validate(submission, template_location, key):
+def validate(submission, goldstandard, key):
     challenge = {'challenge1':'SHEDDING_SC1','challenge2':'SYMPTOMATIC_SC2','challenge3':'LOGSYMPTSCORE_SC3'}
-    goldstandard = pd.read_csv(gold[key])
+    goldstandard = pd.read_csv(goldstandard)
     submission = pd.read_csv(submission)
 
     #CHECK: SUBJECTID must exist
@@ -60,12 +60,12 @@ def validate(submission, template_location, key):
     return(True)
 
 
-def score_1_2(submission, template_location, key):
+def score_1_2(submission, goldstandard, key):
     return(dict(),"Test")
 
-def score_3(submission, template_location, key):
+def score_3(submission, goldstandard, key):
     
-    goldstandard = pd.read_csv(gold[key])
+    goldstandard = pd.read_csv(goldstandard)
     submission = pd.read_csv(submission)
     score = numpy.corrcoef(submission['LOGSYMPTSCORE_SC3'],goldstandard['LOGSYMPTSCORE_SC3'])[0, 1]
     return (dict(score=score),
