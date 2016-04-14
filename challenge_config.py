@@ -150,7 +150,7 @@ def validate_submission(evaluation, submission):
             'challenge2':os.path.join(template_location,'IDResilienceChallenge_SubmissionTemplate_SYMPTOMATIC_SC2.csv'),
             'challenge3':os.path.join(template_location,'IDResilienceChallenge_SubmissionTemplate_LOGSYMPTSCORE_SC3.csv')}
    
-    results = validation_func(submission,goldstandard[config['key']],config['key'])
+    results = validation_func(submission.filePath,goldstandard[config['key']],config['key'])
 
     return results, "Looks OK to me!"
 
@@ -170,7 +170,7 @@ def score_submission(evaluation, submission):
             'challenge2':os.path.join(template_location,'IDResilienceChallenge_GoldStandard_SYMPTOMATIC_SC2.csv'),
             'challenge3':os.path.join(template_location,'IDResilienceChallenge_GoldStandard_LOGSYMPTSCORE_SC3.csv')}
 
-    results = score_func(submission,goldstandard[config['key']],config['key'])
+    results = score_func(submission.filePath,goldstandard[config['key']],config['key'])
 
     return results
 
