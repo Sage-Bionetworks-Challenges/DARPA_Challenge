@@ -3,7 +3,9 @@
 ## challenge specific code and configuration
 ##
 ##-----------------------------------------------------------------------------
-
+import os
+import pandas as pd
+import numpy
 
 ## A Synapse project will hold the assetts for your challenge. Put its
 ## synapse ID here, for example

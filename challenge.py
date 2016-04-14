@@ -47,8 +47,6 @@ import time
 import traceback
 import urllib
 import uuid
-import numpy
-import pandas as pd
 import warnings
 
 try:
