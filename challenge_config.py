@@ -64,7 +64,6 @@ def score_1_2(submission, goldstandard, key):
     return(dict(),"Test")
 
 def score_3(submission, goldstandard, key):
-    
     goldstandard = pd.read_csv(goldstandard)
     submission = pd.read_csv(submission)
     score = numpy.corrcoef(submission['LOGSYMPTSCORE_SC3'],goldstandard['LOGSYMPTSCORE_SC3'])[0, 1]
@@ -119,7 +118,7 @@ config_evaluations = [
         'id':5821583,
         'validation_function': validate,
         'scoring_function': score_1_2,
-        'key': 'challenge1'
+        'key': 'challenge2'
 
 
     },
@@ -128,7 +127,7 @@ config_evaluations = [
         'id':5821621,
         'validation_function': validate,
         'scoring_function': score_3,
-        'key': 'challenge1'
+        'key': 'challenge3'
 
     }
 
