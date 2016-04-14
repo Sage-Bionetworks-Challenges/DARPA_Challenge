@@ -5,7 +5,7 @@
 ##-----------------------------------------------------------------------------
 import os
 import pandas as pd
-import numpy
+import numpy as np
 
 ## A Synapse project will hold the assetts for your challenge. Put its
 ## synapse ID here, for example
@@ -19,21 +19,11 @@ CHALLENGE_NAME = "Example Synapse Challenge"
 ## about errors in the scoring script
 ADMIN_USER_IDS = ["3324230"]
 
-## Each question in your challenge should have an evaluation queue through
-## which participants can submit their predictions or models. The queues
-## should specify the challenge project as their content source. Queues
-## can be created like so:
-##   evaluation = syn.store(Evaluation(
-##     name="My Challenge Q1",
-##     description="Predict all the things!",
-##     contentSource="syn1234567"))
-## ...and found like this:
-##   evaluations = list(syn.getEvaluationByContentSource('syn3375314'))
-## Configuring them here as a list will save a round-trip to the server
-## every time the script starts.
+
+##Challenge validation / scoring ###
+challenge = {'challenge1':'SHEDDING_SC1','challenge2':'SYMPTOMATIC_SC2','challenge3':'LOGSYMPTSCORE_SC3'}
 
 def validate(submission, goldstandard, key):
-    challenge = {'challenge1':'SHEDDING_SC1','challenge2':'SYMPTOMATIC_SC2','challenge3':'LOGSYMPTSCORE_SC3'}
     goldstandard = pd.read_csv(goldstandard)
     submission = pd.read_csv(submission)
 
@@ -59,14 +49,122 @@ def validate(submission, goldstandard, key):
     assert submission[challenge[key]].dtype == 'float64' or submission[challenge[key]].dtype == 'int64','Submissions must be numerical values'
     return(True)
 
+#SCORE 1,2 HELPER FUNCTIONS
+def __nonlinear_interpolated_evalStats(block_df, blockWise_stats):
+    """
+    // given a block* of submitted belief score and blockwise statistics (see:__get_blockWise_stats)
+    calculates the Precision, Recall & False Positive Rate 
+    *A block by definition should have the same belief score
+   
+    """
+    blockValue = block_df.predict.unique()
+    if len(blockValue) != 1:
+        raise Exception("grouping by predict column doesnt yield unique predict vals per group..WIERD")
+    blockValue = blockValue[0]
+    blockStats = blockWise_stats[blockWise_stats.blockValue == blockValue].squeeze() #squeeze will convert one row df to series
+    
+    block_precision = []
+    block_recall = []
+    block_fpr = []
+    total_elements = blockWise_stats.cum_numElements.max()
+    total_truePos = blockWise_stats.cum_truePos.max()
+    total_trueNeg = total_elements - total_truePos
+    for block_depth,row in enumerate(block_df.iterrows()):
+        block_depth += 1  #increase block depth by 1 
+        row = row[1]
+        #calculate the cumulative true positives seen till the last block from the current active block
+        # and the total number of elements(cumulative) seen till the last block
+        if blockStats.block == 1: #no previous obviously
+            cum_truePos_till_lastBlock = 0
+            cum_numElements_till_lastBlock = 0
+            cum_trueNeg_till_lastBlock = 0
+        elif blockStats.block > 1:
+            last_blockStats = blockWise_stats[blockWise_stats.block == (blockStats.block-1)].squeeze()
+            cum_truePos_till_lastBlock = last_blockStats['cum_truePos']
+            cum_numElements_till_lastBlock = last_blockStats['cum_numElements']
+            cum_trueNeg_till_lastBlock = cum_numElements_till_lastBlock - cum_truePos_till_lastBlock
+            
+        truePos = cum_truePos_till_lastBlock + (blockStats.block_truePos_density*block_depth)
+        falsePos = cum_trueNeg_till_lastBlock + ((1 - blockStats.block_truePos_density ) * block_depth)
+        
+        #precision
+        interpolated_precision = truePos /(cum_numElements_till_lastBlock+block_depth)
+        block_precision.append(interpolated_precision)
+        #recall == true positive rate
+        interpolated_recall = truePos /total_truePos
+        block_recall.append(interpolated_recall)
+        #fpr == false positive rate
+        interpolated_fpr = falsePos / total_trueNeg
+        block_fpr.append(interpolated_fpr)
+        
+    block_df['precision'] = block_precision
+    block_df['recall'] = block_recall
+    block_df['fpr'] = block_fpr
+    block_df['block_depth'] = np.arange(1,block_df.shape[0]+1)
+    block_df['block'] = blockStats.block
+    return(block_df)
+
+
+def __get_blockWise_stats(sub_stats):
+    """
+    calculate stats for each block of belief scores
+    """
+    
+    #group to calculate group wise stats for each block
+    grouped = sub_stats.groupby(['predict'], sort=False)
+    
+    #instantiate a pandas dataframe to store the results for each group (tied values)
+    result = pd.DataFrame.from_dict({'block':xrange(len(grouped)),
+                                         'block_numElements'  : np.nan,
+                                         'block_truePos_density' : np.nan,
+                                         'block_truePos'      : np.nan,
+                                         'blockValue'   : np.nan
+                                         })
+    
+    for block,grp in enumerate(grouped):
+        name,grp = grp[0],grp[1]
+        truePositive = sum(grp.truth == 1)
+        grp_truePositive_density = truePositive / float(len(grp))
+        idxs = result.block == block
+        result.block_truePos_density[idxs] = grp_truePositive_density
+        result.block_numElements[idxs] = len(grp)
+        result.block_truePos[idxs] = truePositive
+        result.blockValue[idxs] = grp.predict.unique()
+    result.block = result.block + 1
+    result['cum_numElements'] = result.block_numElements.cumsum()
+    result['cum_truePos'] = result.block_truePos.cumsum()
+    return(result)
 
 def score_1_2(submission, goldstandard, key):
-    return(dict(),"Test")
+    goldstandard = pd.read_csv(goldstandard)
+    submission = pd.read_csv(submission)
+    submission = submission.sort_values('SUBJECTID')
+    goldstandard = goldstandard.sort_values('SUBJECTID')
+
+    sub_stats = pd.DataFrame.from_dict({'predict':submission[challenge[key]], 'truth':goldstandard[challenge[key]]}, dtype='float64')
+    sub_stats = sub_stats.sort_values(['predict'],ascending=False)
+    
+    #calculate blockwise stats for tied precdiction socres
+    blockWise_stats = __get_blockWise_stats(sub_stats)
+    
+    #calculate precision recall & fpr for each block
+    grouped = sub_stats.groupby(['predict'],sort=False)
+    sub_stats = grouped.apply(__nonlinear_interpolated_evalStats,blockWise_stats)
+    
+    precision, recall,  fpr, threshold = sub_stats.precision, sub_stats.recall, sub_stats.fpr, sub_stats.predict 
+    print precision
+    print recall
+    print fpr
+    print threshold
+    return(dict(precision = precision, recall = recall, fpr = fpr, threshold = threshold),
+            "Your submission is scored!")
 
 def score_3(submission, goldstandard, key):
     goldstandard = pd.read_csv(goldstandard)
     submission = pd.read_csv(submission)
-    score = numpy.corrcoef(submission['LOGSYMPTSCORE_SC3'],goldstandard['LOGSYMPTSCORE_SC3'])[0, 1]
+    submission = submission.sort_values('SUBJECTID')
+    goldstandard = goldstandard.sort_values('SUBJECTID')
+    score = np.corrcoef(submission[challenge[key]],goldstandard[challenge[key]])[0, 1]
     return (dict(score=score),
             "Your score is: %.2f" % score)
 
