@@ -7,7 +7,9 @@ import os
 import pandas as pd
 import numpy as np
 import sklearn
+import decimal
 from sklearn.metrics import auc
+from multiprocessing import Pool
 ## A Synapse project will hold the assetts for your challenge. Put its
 ## synapse ID here, for example
 ## CHALLENGE_SYN_ID = "syn1234567"
@@ -136,16 +138,9 @@ def __get_blockWise_stats(sub_stats):
     result['cum_truePos'] = result.block_truePos.cumsum()
     return(result)
 
-def score_1_2(submission, goldstandard, key):
-    goldstandard = pd.read_csv(goldstandard)
-    submission = pd.read_csv(submission)
-    submission = submission.sort_values('SUBJECTID')
-    goldstandard = goldstandard.sort_values('SUBJECTID')
 
-    sub_stats = pd.DataFrame.from_dict({'predict':submission[challenge[key]], 'truth':goldstandard[challenge[key]]}, dtype='float64')
-    sub_stats = sub_stats.sort_values(['predict'],ascending=False)
-    
-    #calculate blockwise stats for tied precdiction socres
+def getAUROC_PR(sub_stats):
+    #calculate blockwise stats for tied precdiction scores
     blockWise_stats = __get_blockWise_stats(sub_stats)
     
     #calculate precision recall & fpr for each block
@@ -157,10 +152,35 @@ def score_1_2(submission, goldstandard, key):
     roc_auc = auc(fpr,tpr,reorder=True)
     #PR curve AUC
     PR_auc = auc(recall, precision,reorder=True)
+
     results = (roc_auc, PR_auc)
     results = [ round(x,4) for x in results]
+    return(results)
+
+
+def score_1_2(submission, goldstandard, key):
+    goldstandard = pd.read_csv(goldstandard)
+    submission = pd.read_csv(submission)
+    submission = submission.sort_values('SUBJECTID')
+    goldstandard = goldstandard.sort_values('SUBJECTID')
+
+    sub_stats = pd.DataFrame.from_dict({'predict':submission[challenge[key]], 'truth':goldstandard[challenge[key]]}, dtype='float64')
+    sub_stats = sub_stats.sort_values(['predict'],ascending=False)
+    results = getAUROC_PR(sub_stats)
+    roc_total = []
+    pr_total = []
+    permute_times = 1000
+    for i in xrange(permute_times):
+        np.random.shuffle(sub_stats['predict'].values)
+        temp = getAUROC_PR(sub_stats)
+        roc_total.append(temp[0])
+        pr_total.append(temp[1])
+
+    pVal_ROC = decimal.Decimal(sum(np.float64(results[0]) >= roc_total)) / decimal.Decimal(permute_times)
+    pVal_PR = decimal.Decimal(sum(np.float64(results[1]) >= pr_total)) / decimal.Decimal(permute_times)
+
     return(dict(AUROC = results[0], AUPR = results[1]),
-            "AUROC: %.2f\nAUPR: %.2f" % (results[0],results[1]))
+            "AUROC: %.2f\nAUPR: %.2f\nAUROC_pVal: %.4f\nAUPR_pVal: %.4f" % (results[0],results[1], pVal_ROC, pVal_PR))
 
 def score_3(submission, goldstandard, key):
     goldstandard = pd.read_csv(goldstandard)
@@ -168,9 +188,18 @@ def score_3(submission, goldstandard, key):
     submission = submission.sort_values('SUBJECTID')
     goldstandard = goldstandard.sort_values('SUBJECTID')
     score = np.corrcoef(submission[challenge[key]],goldstandard[challenge[key]])[0, 1]
-    return (dict(score=score),
-            "Your score is: %.2f" % score)
 
+    total = []
+    permute_times = 10000
+    for i in xrange(permute_times):
+        np.random.shuffle(submission[challenge[key]].values)
+        temp = np.corrcoef(submission[challenge[key]],goldstandard[challenge[key]])[0, 1]
+        total.append(temp)
+
+    pVal = decimal.Decimal(sum(score >= total)) / decimal.Decimal(permute_times)
+
+    return (dict(score=score),
+            "Your p-value is: %.4f\n Your correlation is: %.2f" % (pVal,score))
 
 
 evaluation_queues = [
