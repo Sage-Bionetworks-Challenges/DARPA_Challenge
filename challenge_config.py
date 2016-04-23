@@ -180,7 +180,7 @@ def score_1_2(submission, goldstandard, key):
     auroc_total = []
     aupr_total = []
     for auc, pr in temp:
-        auroc_total.append(auroc)
+        auroc_total.append(auc)
         aupr_total.append(pr)
 
     pVal_ROC = decimal.Decimal(sum(np.float64(true_auroc) >= auroc_total)) / decimal.Decimal(permute_times+1)
