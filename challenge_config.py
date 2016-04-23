@@ -186,7 +186,7 @@ def score_1_2(submission, goldstandard, key):
     pVal_ROC = decimal.Decimal(sum(np.float64(true_auroc) >= auroc_total)) / decimal.Decimal(permute_times+1)
     pVal_PR = decimal.Decimal(sum(np.float64(true_aupr) >= aupr_total)) / decimal.Decimal(permute_times+1)
 
-    return(dict(AUROC = true_auroc, AUPR = true_aupr),
+    return(dict(AUROC = true_auroc, AUPR = true_aupr, nAUROC_pVal = pVal_ROC, nAUPR_pVal=pVal_PR),
             "AUROC: %.2f\nAUPR: %.2f\nAUROC_pVal: %.4f\nAUPR_pVal: %.4f" % (true_auroc,true_aupr, pVal_ROC, pVal_PR))
 
 def score_3(submission, goldstandard, key):
@@ -205,7 +205,7 @@ def score_3(submission, goldstandard, key):
 
     pVal = decimal.Decimal(sum(score >= total)) / decimal.Decimal(permute_times+1)
 
-    return (dict(score=score),
+    return (dict(score=score, pVal = pVal),
             "Your p-value is: %.4f\n Your correlation is: %.2f" % (pVal,score))
 
 
