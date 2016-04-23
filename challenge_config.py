@@ -112,7 +112,7 @@ def __get_blockWise_stats(sub_stats):
     """
     calculate stats for each block of belief scores
     """
-    
+    pd.options.mode.chained_assignment = None
     #group to calculate group wise stats for each block
     grouped = sub_stats.groupby(['predict'], sort=False)
     
@@ -154,8 +154,8 @@ def getAUROC_PR(sub_stats):
     PR_auc = auc(recall, precision,reorder=True)
 
     results = (roc_auc, PR_auc)
-    results = [ round(x,4) for x in results]
-    return(results)
+    #results = [ round(x,4) for x in results]
+    return(roc_auc,PR_auc)
 
 
 def score_1_2(submission, goldstandard, key):
@@ -166,21 +166,28 @@ def score_1_2(submission, goldstandard, key):
 
     sub_stats = pd.DataFrame.from_dict({'predict':submission[challenge[key]], 'truth':goldstandard[challenge[key]]}, dtype='float64')
     sub_stats = sub_stats.sort_values(['predict'],ascending=False)
-    results = getAUROC_PR(sub_stats)
-    roc_total = []
-    pr_total = []
-    permute_times = 1000
+    true_auroc, true_aupr = getAUROC_PR(sub_stats)
+    shuffled = dict()
+    permute_times = 10000
     for i in xrange(permute_times):
         np.random.shuffle(sub_stats['predict'].values)
-        temp = getAUROC_PR(sub_stats)
-        roc_total.append(temp[0])
-        pr_total.append(temp[1])
+        sub_stats = sub_stats.reset_index()
+        del sub_stats['index']
+        shuffled[i] = sub_stats
 
-    pVal_ROC = decimal.Decimal(sum(np.float64(results[0]) >= roc_total)) / decimal.Decimal(permute_times)
-    pVal_PR = decimal.Decimal(sum(np.float64(results[1]) >= pr_total)) / decimal.Decimal(permute_times)
+    mp = Pool(4)
+    temp = mp.map(getAUROC_PR,shuffled.values())
+    auroc_total = []
+    aupr_total = []
+    for auc, pr in temp:
+        auroc_total.append(auroc)
+        aupr_total.append(pr)
 
-    return(dict(AUROC = results[0], AUPR = results[1]),
-            "AUROC: %.2f\nAUPR: %.2f\nAUROC_pVal: %.4f\nAUPR_pVal: %.4f" % (results[0],results[1], pVal_ROC, pVal_PR))
+    pVal_ROC = decimal.Decimal(sum(np.float64(true_auroc) >= auroc_total)) / decimal.Decimal(permute_times+1)
+    pVal_PR = decimal.Decimal(sum(np.float64(true_aupr) >= aupr_total)) / decimal.Decimal(permute_times+1)
+
+    return(dict(AUROC = true_auroc, AUPR = true_aupr),
+            "AUROC: %.2f\nAUPR: %.2f\nAUROC_pVal: %.4f\nAUPR_pVal: %.4f" % (true_auroc,true_aupr, pVal_ROC, pVal_PR))
 
 def score_3(submission, goldstandard, key):
     goldstandard = pd.read_csv(goldstandard)
@@ -196,7 +203,7 @@ def score_3(submission, goldstandard, key):
         temp = np.corrcoef(submission[challenge[key]],goldstandard[challenge[key]])[0, 1]
         total.append(temp)
 
-    pVal = decimal.Decimal(sum(score >= total)) / decimal.Decimal(permute_times)
+    pVal = decimal.Decimal(sum(score >= total)) / decimal.Decimal(permute_times+1)
 
     return (dict(score=score),
             "Your p-value is: %.4f\n Your correlation is: %.2f" % (pVal,score))
