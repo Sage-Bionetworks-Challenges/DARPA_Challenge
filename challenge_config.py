@@ -183,8 +183,8 @@ def score_1_2(submission, goldstandard, key):
         auroc_total.append(auc)
         aupr_total.append(pr)
 
-    pVal_ROC = decimal.Decimal(auroc_total >= sum(np.float64(true_auroc))) / decimal.Decimal(permute_times+1)
-    pVal_PR = decimal.Decimal(aupr_total >= sum(np.float64(true_aupr))) / decimal.Decimal(permute_times+1)
+    pVal_ROC = decimal.Decimal(sum(auroc_total >= np.float64(true_auroc))) / decimal.Decimal(permute_times+1)
+    pVal_PR = decimal.Decimal(sum(aupr_total >= np.float64(true_aupr))) / decimal.Decimal(permute_times+1)
 
     return(dict(AUROC = true_auroc, AUPR = true_aupr, nAUROC_pVal = pVal_ROC, nAUPR_pVal=pVal_PR),
             "Thank you for your submission. Your submission has been validated and scored. Stay tuned for results on the challenge site at the end of each challenge phase.")
