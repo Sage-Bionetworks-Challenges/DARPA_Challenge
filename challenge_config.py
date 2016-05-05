@@ -175,7 +175,7 @@ def score_1_2(submission, goldstandard, key):
         del sub_stats['index']
         shuffled[i] = sub_stats
 
-    mp = Pool(4)
+    mp = Pool(2)
     temp = mp.map(getAUROC_PR,shuffled.values())
     auroc_total = []
     aupr_total = []
