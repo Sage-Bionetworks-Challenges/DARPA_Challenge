@@ -183,11 +183,11 @@ def score_1_2(submission, goldstandard, key):
         auroc_total.append(auc)
         aupr_total.append(pr)
 
-    pVal_ROC = decimal.Decimal(sum(np.float64(true_auroc) >= auroc_total)) / decimal.Decimal(permute_times+1)
-    pVal_PR = decimal.Decimal(sum(np.float64(true_aupr) >= aupr_total)) / decimal.Decimal(permute_times+1)
+    pVal_ROC = decimal.Decimal(auroc_total >= sum(np.float64(true_auroc))) / decimal.Decimal(permute_times+1)
+    pVal_PR = decimal.Decimal(aupr_total >= sum(np.float64(true_aupr))) / decimal.Decimal(permute_times+1)
 
     return(dict(AUROC = true_auroc, AUPR = true_aupr, nAUROC_pVal = pVal_ROC, nAUPR_pVal=pVal_PR),
-            "AUROC: %.2f\nAUPR: %.2f\nAUROC_pVal: %.4f\nAUPR_pVal: %.4f" % (true_auroc,true_aupr, pVal_ROC, pVal_PR))
+            "Thank you for your submission. Your submission has been validated and scored. Stay tuned for results on the challenge site at the end of each challenge phase.")
 
 def score_3(submission, goldstandard, key):
     goldstandard = pd.read_csv(goldstandard)
@@ -203,10 +203,10 @@ def score_3(submission, goldstandard, key):
         temp = np.corrcoef(submission[challenge[key]],goldstandard[challenge[key]])[0, 1]
         total.append(temp)
 
-    pVal = decimal.Decimal(sum(score >= total)) / decimal.Decimal(permute_times+1)
+    pVal = decimal.Decimal(sum(total >= score)) / decimal.Decimal(permute_times+1)
 
     return (dict(score=score, pVal = pVal),
-            "Your p-value is: %.4f\n Your correlation is: %.2f" % (pVal,score))
+            "Thank you for your submission. Your submission has been validated and scored. Stay tuned for results on the challenge site at the end of each challenge phase.")
 
 
 evaluation_queues = [
