@@ -103,29 +103,42 @@ def sorting(dfcolumn,ascending=False):
     return(ranking)
 
 
-rankings = syn.tableQuery('SELECT * FROM syn6088407')
-rankingsdf = rankings.asDataFrame()
-rankingsdf['AUPR_rank'] = sorting(rankingsdf['AUPR'])
-rankingsdf['AUROC_rank'] = sorting(rankingsdf['AUROC'])
-rankingsdf['average_rank'] = (rankingsdf['AUPR_rank'] + rankingsdf['AUROC_rank'])/2
-rankingsdf['final_rank'] = sorting(rankingsdf['average_rank'],True)
-rankingsdf['average_pVal'] = (rankingsdf['nAUPR_pVal'] + rankingsdf['nAUROC_pVal'])/2
-rankingsdf['pVal_boolean'] = rankingsdf['average_pVal'] < 0.05
+def addRanking_SC1_2(x):
+    temp = syn.getSubmissionStatus(x['objectId'])
+    temp.annotations['stringAnnos'].append({'isPrivate':False,'key':'AUPRpVal_boolean','value':x['AUPRpVal_boolean']})
+    temp.annotations['stringAnnos'].append({'isPrivate':False,'key':'AUROCpVal_boolean','value':x['AUROCpVal_boolean']})
+    temp.annotations['doubleAnnos'].append({'isPrivate':False,'key':'finalRank','value':x['final_rank']})
+    syn.store(temp)
 
-rankingsdf.apply(lambda x: addRanking(x),axis=1)
-def addRanking(x):
+def addRanking_SC3(x):
     temp = syn.getSubmissionStatus(x['objectId'])
     temp.annotations['stringAnnos'].append({'isPrivate':False,'key':'booleanpVal','value':x['pVal_boolean']})
     temp.annotations['doubleAnnos'].append({'isPrivate':False,'key':'finalRank','value':x['final_rank']})
     syn.store(temp)
 
 
-##### SC3
-rankings = syn.tableQuery('SELECT * FROM syn6088409')
-rankingsdf = rankings.asDataFrame()
-rankingsdf['final_rank'] = sorting(rankingsdf['score'])
-rankingsdf['pVal_boolean'] = rankingsdf['pVal'] < 0.05
-rankingsdf.apply(lambda x: addRanking(x),axis=1)
+def SC1_2_ranking(synId):
+    rankings = syn.tableQuery('SELECT * FROM %s' % synId)
+    rankingsdf = rankings.asDataFrame()
+    rankingsdf['AUPR_rank'] = sorting(rankingsdf['AUPR'])
+    rankingsdf['AUROC_rank'] = sorting(rankingsdf['AUROC'])
+    rankingsdf['average_rank'] = (rankingsdf['AUPR_rank'] + rankingsdf['AUROC_rank'])/2
+    rankingsdf['final_rank'] = sorting(rankingsdf['average_rank'],True)
+    rankingsdf['AUPRpVal_boolean'] = rankingsdf['nAUPR_pVal'] < 0.05
+    rankingsdf['AUROCpVal_boolean'] = rankingsdf['nAUROC_pVal'] < 0.05
+    rankingsdf.apply(lambda x: addRanking_SC1_2(x),axis=1)
+
+def SC3_ranking(synId):
+   ##### SC3
+    rankings = syn.tableQuery('SELECT * FROM syn6088409')
+    rankingsdf = rankings.asDataFrame()
+    rankingsdf['final_rank'] = sorting(rankingsdf['score'])
+    rankingsdf['pVal_boolean'] = rankingsdf['pVal'] < 0.05
+    rankingsdf.apply(lambda x: addRanking_SC3(x),axis=1) 
+
+SC1_2_ranking("syn6088407")
+SC1_2_ranking("syn6088408")
+SC3_ranking("syn6088409")
 
 
 
