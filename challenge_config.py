@@ -162,7 +162,7 @@ def getAUROC_PR(sub_stats):
     precision_new.append(precision_new[len(precision_new)-1])
     precision_new.reverse()
 
-    PR_auc = auc(recall_new, precision_new,reorder=False)
+    PR_auc = auc(recall_new, precision_new,reorder=True)
     #results = [ round(x,4) for x in results]
     return(roc_auc,PR_auc)
 
