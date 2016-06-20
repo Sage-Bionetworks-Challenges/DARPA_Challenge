@@ -424,6 +424,52 @@ def archive(evaluation, destination=None, name=None, query=None):
     print "created:", entity.id, entity.name
     return entity.id
 
+def sorting(dfcolumn,ascending=False):
+    i=1
+    ranking=[1]
+    sorteddf = dfcolumn.sort_values(ascending=ascending)
+    first = sorteddf[0]
+    for value in sorteddf[1:]:
+        if value == first:
+            ranking.append(i)
+        else:
+            i = i+1
+            ranking.append(i)
+        first = value
+    return(ranking)
+
+def addRanking_SC1_2(x):
+    temp = syn.getSubmissionStatus(x['objectId'])
+    temp.annotations['stringAnnos'].append({'isPrivate':False,'key':'AUPRpVal_boolean','value':x['AUPRpVal_boolean']})
+    temp.annotations['stringAnnos'].append({'isPrivate':False,'key':'AUROCpVal_boolean','value':x['AUROCpVal_boolean']})
+    temp.annotations['doubleAnnos'].append({'isPrivate':False,'key':'finalRank','value':x['final_rank']})
+    syn.store(temp)
+
+def addRanking_SC3(x):
+    temp = syn.getSubmissionStatus(x['objectId'])
+    temp.annotations['stringAnnos'].append({'isPrivate':False,'key':'booleanpVal','value':x['pVal_boolean']})
+    temp.annotations['doubleAnnos'].append({'isPrivate':False,'key':'finalRank','value':x['final_rank']})
+    syn.store(temp)
+
+
+def SC1_2_ranking(synId):
+    rankings = syn.tableQuery('SELECT * FROM %s' % synId)
+    rankingsdf = rankings.asDataFrame()
+    rankingsdf['AUPR_rank'] = sorting(rankingsdf['AUPR'])
+    rankingsdf['AUROC_rank'] = sorting(rankingsdf['AUROC'])
+    rankingsdf['average_rank'] = (rankingsdf['AUPR_rank'] + rankingsdf['AUROC_rank'])/2
+    rankingsdf['final_rank'] = sorting(rankingsdf['average_rank'],True)
+    rankingsdf['AUPRpVal_boolean'] = rankingsdf['nAUPR_pVal'] < 0.05
+    rankingsdf['AUROCpVal_boolean'] = rankingsdf['nAUROC_pVal'] < 0.05
+    rankingsdf.apply(lambda x: addRanking_SC1_2(x),axis=1)
+
+def SC3_ranking(synId):
+   ##### SC3
+    rankings = syn.tableQuery('SELECT * FROM syn6088409')
+    rankingsdf = rankings.asDataFrame()
+    rankingsdf['final_rank'] = sorting(rankingsdf['score'])
+    rankingsdf['pVal_boolean'] = rankingsdf['pVal'] < 0.05
+    rankingsdf.apply(lambda x: addRanking_SC3(x),axis=1) 
 
 ## ==================================================
 ##  Handlers for commands
@@ -495,8 +541,13 @@ def command_score(args):
 
 def command_rank(args):
     evaluation = int(args.evaluation)
-    evaluationName = {5821575:"DARPA-SC1",5821583:"DARPA-SC2",5821621:"DARPA-SC3"}
-    create_leaderboard_table(evaluation, conf.leaderboard_columns[evaluation], evaluationName[evaluation], "syn5641757",args.dry_run)
+    evaluationFunc = {5821575:SC1_2_ranking,5821583:SC1_2_ranking,5821621:SC3_ranking}
+    eval_synId = {5821575:"syn6088407",5821583:"syn6088408",5821621:"syn6088409"}
+    evaluationFunc[evaluation](eval_synId[eval_synId])
+    #SC1_2_ranking("syn6088407")
+    #SC1_2_ranking("syn6088408")
+    #SC3_ranking("syn6088409")
+    #create_leaderboard_table(evaluation, conf.leaderboard_columns[evaluation], evaluationName[evaluation], "syn5641757",args.dry_run)
 
 
 
@@ -514,7 +565,10 @@ def command_leaderboard(args):
 
 
 def command_archive(args):
-    archive(args.evaluation, args.destination, name=args.name, query=args.query)
+    evaluation = int(args.evaluation)
+    evaluationName = {5821575:"DARPA-SC1",5821583:"DARPA-SC2",5821621:"DARPA-SC3"}
+    create_leaderboard_table(evaluation, conf.leaderboard_columns[evaluation], evaluationName[evaluation], "syn5641757", args.dry_run)
+    #archive(args.evaluation, args.destination, name=args.name, query=args.query)
 
 
 ## ==================================================
@@ -573,9 +627,9 @@ def main():
 
     parser_archive = subparsers.add_parser('archive', help="Archive submissions to a challenge")
     parser_archive.add_argument("evaluation", metavar="EVALUATION-ID", default=None)
-    parser_archive.add_argument("destination", metavar="FOLDER-ID", default=None)
-    parser_archive.add_argument("-q", "--query", default=None)
-    parser_archive.add_argument("-n", "--name", default=None)
+    #parser_archive.add_argument("destination", metavar="FOLDER-ID", default=None)
+    #parser_archive.add_argument("-q", "--query", default=None)
+    #parser_archive.add_argument("-n", "--name", default=None)
     parser_archive.set_defaults(func=command_archive)
 
     parser_leaderboard = subparsers.add_parser('leaderboard', help="Print the leaderboard for an evaluation")
