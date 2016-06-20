@@ -443,14 +443,19 @@ def addRanking_SC1_2(x):
     temp.annotations['stringAnnos'].append({'isPrivate':False,'key':'AUPRpVal_boolean','value':x['AUPRpVal_boolean']})
     temp.annotations['stringAnnos'].append({'isPrivate':False,'key':'AUROCpVal_boolean','value':x['AUROCpVal_boolean']})
     temp.annotations['doubleAnnos'].append({'isPrivate':False,'key':'finalRank','value':x['final_rank']})
-    syn.store(temp)
+    try:
+        syn.store(temp)
+    except Exception as e:
+        print(e)
 
 def addRanking_SC3(x):
     temp = syn.getSubmissionStatus(x['objectId'])
     temp.annotations['stringAnnos'].append({'isPrivate':False,'key':'booleanpVal','value':x['pVal_boolean']})
     temp.annotations['doubleAnnos'].append({'isPrivate':False,'key':'finalRank','value':x['final_rank']})
-    syn.store(temp)
-
+    try:
+        syn.store(temp)
+    except Exception as e:
+        print(e)
 
 def SC1_2_ranking(synId):
     rankings = syn.tableQuery('SELECT * FROM %s' % synId)
