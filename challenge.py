@@ -495,21 +495,8 @@ def command_score(args):
 
 def command_rank(args):
     evaluation = int(args.evaluation)
-    leaderboard_columns = {}
-
-    leaderboard_columns[5821575] = LEADERBOARD_COLUMNS + [
-        Column(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
-        Column(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
-        Column(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
-        Column(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
-
-    leaderboard_columns[5821583] = leaderboard_columns[5821575]
-    leaderboard_columns[5821621] = LEADERBOARD_COLUMNS + [
-        Column(name='score',         display_name='Correlation',   columnType='DOUBLE'),
-        Column(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
-    
     evaluationName = {5821575:"DARPA-SC1",5821583:"DARPA-SC2",5821621:"DARPA-SC3"}
-    create_leaderboard_table(evaluation, leaderboard_columns[evaluation], evaluationName[evaluation], "syn5641757",args.dry_run)
+    create_leaderboard_table(evaluation, conf.leaderboard_columns[evaluation], evaluationName[evaluation], "syn5641757",args.dry_run)
 
 
 

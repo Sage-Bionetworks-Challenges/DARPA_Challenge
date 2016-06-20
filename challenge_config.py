@@ -242,11 +242,17 @@ LEADERBOARD_COLUMNS = [
 ## rmse and auc to the basic leaderboard information. In general, different
 ## questions would typically have different scoring metrics.
 leaderboard_columns = {}
-for q in evaluation_queues:
-    leaderboard_columns[q['id']] = LEADERBOARD_COLUMNS + [
-        dict(name='score',         display_name='Score',   columnType='DOUBLE'),
-        dict(name='rmse',          display_name='RMSE',    columnType='DOUBLE'),
-        dict(name='auc',           display_name='AUC',     columnType='DOUBLE')]
+leaderboard_columns[5821575] = LEADERBOARD_COLUMNS + [
+    Column(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
+    Column(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
+    Column(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
+    Column(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
+
+leaderboard_columns[5821583] = leaderboard_columns[5821575]
+leaderboard_columns[5821621] = LEADERBOARD_COLUMNS + [
+    Column(name='score',         display_name='Correlation',   columnType='DOUBLE'),
+    Column(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
+
 
 ## map each evaluation queues to the synapse ID of a table object
 ## where the table holds a leaderboard for that question
