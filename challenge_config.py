@@ -28,7 +28,10 @@ challenge = {'challenge1':'SHEDDING_SC1','challenge2':'SYMPTOMATIC_SC2','challen
 
 def validate(submission, goldstandard, key):
     goldstandard = pd.read_csv(goldstandard)
-    submission = pd.read_csv(submission)
+    try:
+        submission = pd.read_csv(submission)
+    except Exception as e:
+        raise ValueError("Submitted file must be a comma-delimited file")
 
     #CHECK: SUBJECTID must exist
     assert 'SUBJECTID' in submission, 'SUBJECTID must be one of the column headers\nYour column headers= %s' % ','.join(list(submission.columns))
