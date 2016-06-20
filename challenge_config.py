@@ -10,6 +10,7 @@ import sklearn
 import decimal
 from sklearn.metrics import auc
 from multiprocessing import Pool
+from synapseclient import Column
 ## A Synapse project will hold the assetts for your challenge. Put its
 ## synapse ID here, for example
 ## CHALLENGE_SYN_ID = "syn1234567"
