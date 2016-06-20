@@ -280,13 +280,15 @@ def score(evaluation, dry_run=False):
     sys.stdout.write('\n')
 
 
-def create_leaderboard_table(name, columns, parent, evaluation, dry_run=False):
-    if not dry_run:
+def create_leaderboard_table(evaluation,cols,name,parent, dry_run=False):
+    temp = syn.query('select id,name from table where projectId == "%s" and name == "%s"' % (parent,name))
+    if temp['totalNumberOfResults'] == 0:
         schema = syn.store(Schema(name=name, columns=cols, parent=project))
-    for submission, status in syn.getSubmissionBundles(evaluation):
+    else:
+        schema = syn.get(temp['results'][0]['table.id'])
+    for submission, status in syn.getSubmissionBundles(evaluation,status='SCORED'):
         annotations = synapseclient.annotations.from_submission_status_annotations(status.annotations) if 'annotations' in status else {}
-        update_leaderboard_table(schema.id, submission, annotations, dry_run)
-
+        update_leaderboard_table(schema.id, submission, annotations)
 
 def update_leaderboard_table(leaderboard_table, submission, fields, dry_run=False):
     """
@@ -492,7 +494,23 @@ def command_score(args):
 
 
 def command_rank(args):
-    raise NotImplementedError('Implement a ranking function for your challenge')
+    evaluation = int(args.evaluation)
+    leaderboard_columns = {}
+
+    leaderboard_columns[5821575] = LEADERBOARD_COLUMNS + [
+        Column(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
+        Column(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
+        Column(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
+        Column(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
+
+    leaderboard_columns[5821583] = leaderboard_columns[5821575]
+    leaderboard_columns[5821621] = LEADERBOARD_COLUMNS + [
+        Column(name='score',         display_name='Correlation',   columnType='DOUBLE'),
+        Column(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
+    
+    evaluationName = {5821575:"DARPA-SC1",5821583:"DARPA-SC2",5821621:"DARPA-SC3"}
+    create_leaderboard_table(evaluation, leaderboard_columns[evaluation], evaluationName[evaluation], "syn5641757",args.dry_run)
+
 
 
 def command_leaderboard(args):
