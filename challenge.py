@@ -543,7 +543,8 @@ def command_rank(args):
     evaluation = int(args.evaluation)
     evaluationFunc = {5821575:SC1_2_ranking,5821583:SC1_2_ranking,5821621:SC3_ranking}
     eval_synId = {5821575:"syn6088407",5821583:"syn6088408",5821621:"syn6088409"}
-    evaluationFunc[evaluation](eval_synId[eval_synId])
+    eval_functions = evaluationFunc[evaluation]
+    eval_functions(eval_synId[eval_synId])
     #SC1_2_ranking("syn6088407")
     #SC1_2_ranking("syn6088408")
     #SC3_ranking("syn6088409")
