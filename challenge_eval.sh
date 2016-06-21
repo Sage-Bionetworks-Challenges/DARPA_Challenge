@@ -10,3 +10,16 @@ python challenge.py -u DARPA --send-messages --notifications validate --all >> l
 #Score submissions
 #--------------------
 python challenge.py -u DARPA --send-messages --notifications score --all >> log/score.log 2>&1
+
+
+#--------------------
+#Archive and Rank
+#--------------------
+python challenge.py archive 5821575
+python challenge.py rank 5821575
+
+python challenge.py archive 5821583
+python challenge.py rank 5821583
+
+python challenge.py archive 5821621
+python challenge.py rank 5821621
