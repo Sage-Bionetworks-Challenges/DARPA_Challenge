@@ -444,7 +444,7 @@ def addRanking_SC1_2(x):
     AUPRpVal_boolean['value'] = x['AUPRpVal_boolean']
     AUROCpVal_boolean = filter(lambda input: input.get('key', None) == "AUROCpVal_boolean", temp.annotations['stringAnnos'])[0]
     AUROCpVal_boolean['value'] = x['AUROCpVal_boolean']
-    finalRank = filter(lambda input: input.get('key', None) == "finalRank", temp.annotations['doubleAnnos'])[0]
+    finalRank = filter(lambda input: input.get('key', None) == "finalRank", temp.annotations['longAnnos'])[0]
     finalRank['value'] = x['final_rank']
     syn.store(temp)
 
@@ -453,7 +453,7 @@ def addRanking_SC3(x):
     temp = syn.getSubmissionStatus(x['objectId'])
     booleanpVal = filter(lambda input: input.get('key', None) == "booleanpVal", temp.annotations['stringAnnos'])[0]
     booleanpVal['value'] = x['pVal_boolean']
-    finalRank = filter(lambda input: input.get('key', None) == "finalRank", temp.annotations['doubleAnnos'])[0]
+    finalRank = filter(lambda input: input.get('key', None) == "finalRank", temp.annotations['longAnnos'])[0]
     finalRank['value'] = x['final_rank']
     syn.store(temp)
 
