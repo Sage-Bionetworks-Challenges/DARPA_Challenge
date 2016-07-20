@@ -199,7 +199,7 @@ def score_1_2(submission, goldstandard, key):
     pVal_ROC = decimal.Decimal(sum(auroc_total >= np.float64(true_auroc))) / decimal.Decimal(permute_times+1)
     pVal_PR = decimal.Decimal(sum(aupr_total >= np.float64(true_aupr))) / decimal.Decimal(permute_times+1)
 
-    return(dict(AUROC = true_auroc, AUPR = true_aupr, nAUROC_pVal = pVal_ROC, nAUPR_pVal=pVal_PR, AUPRpVal_boolean= "NA", AUROCpVal_boolean="NA", finalRank=0),
+    return(dict(AUROC = round(true_auroc,4), AUPR = rouond(true_aupr,4), nAUROC_pVal = "{:.2e}".format(pVal_ROC), nAUPR_pVal="{:.2e}".format(pVal_PR), AUPRpVal_boolean= "NA", AUROCpVal_boolean="NA", finalRank=0),
             "Thank you for your submission. Your submission has been validated and scored. Stay tuned for results on the challenge site at the end of each challenge phase.")
 
 def score_3(submission, goldstandard, key):
@@ -218,7 +218,7 @@ def score_3(submission, goldstandard, key):
 
     pVal = decimal.Decimal(sum(total >= score)) / decimal.Decimal(permute_times+1)
 
-    return (dict(score=score, pVal = pVal, booleanpVal="NA", finalRank=0),
+    return (dict(score=round(score,4), pVal = "{:.2e}".format(pVal), booleanpVal="NA", finalRank=0),
             "Thank you for your submission. Your submission has been validated and scored. Stay tuned for results on the challenge site at the end of each challenge phase.")
 
 
