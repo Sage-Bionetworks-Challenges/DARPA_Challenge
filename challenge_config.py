@@ -33,10 +33,10 @@ def validate(submission, goldstandard, key):
         submission = pd.read_csv(submission)
     except Exception as e:
         raise ValueError("Submitted file must be a comma-delimited file")
-
+    #FIX BYTE CASE
     if submission.columns.values[0] == '\xef\xbb\xbfSUBJECTID':
         submission.columns.values[0] = 'SUBJECTID'
-        
+
     #CHECK: SUBJECTID must exist
     assert 'SUBJECTID' in submission, 'SUBJECTID must be one of the column headers\nYour column headers= %s' % ','.join(list(submission.columns))
 
