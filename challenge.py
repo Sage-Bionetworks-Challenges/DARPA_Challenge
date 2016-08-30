@@ -286,11 +286,14 @@ def create_leaderboard_table(evaluation,cols,name,parent, dry_run=False):
         schema = syn.store(Schema(name=name, columns=cols, parent=project))
     else:
         schema = syn.get(temp['results'][0]['table.id'])
+    temp = syn.tableQuery('select * from %s' % schema.id)
+
+    df = temp.asDataFrame()
     for submission, status in syn.getSubmissionBundles(evaluation,status='SCORED'):
         annotations = synapseclient.annotations.from_submission_status_annotations(status.annotations) if 'annotations' in status else {}
-        update_leaderboard_table(schema.id, submission, annotations)
+        update_leaderboard_table(df,schema.id,  submission, annotations)
 
-def update_leaderboard_table(leaderboard_table, submission, fields, dry_run=False):
+def update_leaderboard_table(df, tableId, submission, fields, dry_run=False):
     """
     Insert or update a record in a leaderboard table for a submission.
 
@@ -305,28 +308,34 @@ def update_leaderboard_table(leaderboard_table, submission, fields, dry_run=Fals
     fields['versionNumber'] = submission.versionNumber
     fields['name'] = submission.name
 
-    results = syn.tableQuery("select * from %s where objectId=%s" % (leaderboard_table, submission.id), resultsAs="rowset")
-    rowset = results.asRowSet()
-
-    ## figure out if we're inserting or updating
-    if len(rowset['rows']) == 0:
-        row = {'values':[]}
-        rowset['rows'].append(row)
-        mode = 'insert'
-    elif len(rowset['rows']) == 1:
-        row = rowset['rows'][0]
+    #results = syn.tableQuery("select * from %s where objectId=%s" % (leaderboard_table, submission.id), resultsAs="rowset")
+    #rowset = results.asRowSet()
+    if sum(df['objectId'].isin([int(submission.id)])) == 0:
+        mode='insert'
+    elif sum(df['objectId'].isin([int(submission.id)]))  == 1:
         mode = 'update'
     else:
         ## shouldn't happen
         raise RuntimeError("Multiple entries in leaderboard table %s for submission %s" % (leaderboard_table,submission.id))
+    row = [fields.get(col, None) for col in df.columns.values]
 
+    ## figure out if we're inserting or updating
+    #if len(rowset['rows']) == 0:
+    #    row = {'values':[]}
+    #    rowset['rows'].append(row)
+    #    mode = 'insert'
+    #    print(row)
+    #elif len(rowset['rows']) == 1:
+    #    row = rowset['rows'][0]
+    #    mode = 'update'
+    
     ## build list of fields in proper order according to headers
-    row['values'] = [fields.get(col['name'], None) for col in rowset['headers']]
-
+    #row['values'] = [fields.get(col['name'], None) for col in rowset['headers']]
     if dry_run:
         print mode, "row "+row['rowId'] if 'rowId' in row else "new row", row['values']
     else:
-        return syn.store(rowset)
+        if mode == 'insert':
+            return syn.store(synapseclient.Table(tableId, [row]))
 
 
 def query(evaluation, columns, out=sys.stdout):
@@ -474,7 +483,7 @@ def SC1_2_ranking(synId):
 
 def SC3_ranking(synId):
    ##### SC3
-    rankings = syn.tableQuery('SELECT * FROM syn6088409')
+    rankings = syn.tableQuery('SELECT * FROM %s' % synId)
     rankingsdf = rankings.asDataFrame()
     rankingsdf = rankingsdf.sort_values('score',ascending=False)
     rankingsdf['final_rank'] = sorting(rankingsdf['score'])
@@ -552,7 +561,7 @@ def command_score(args):
 def command_rank(args):
     evaluation = int(args.evaluation)
     evaluationFunc = {5821575:SC1_2_ranking,5821583:SC1_2_ranking,5821621:SC3_ranking}
-    eval_synId = {5821575:"syn6088407",5821583:"syn6088408",5821621:"syn6088409"}
+    eval_synId = {5821575:"syn7205099",5821583:"syn7205140",5821621:"syn7205142"}
     #eval_functions = evaluationFunc[evaluation]
     evaluationFunc[evaluation](eval_synId[evaluation])
     #SC1_2_ranking("syn6088407")
@@ -577,7 +586,7 @@ def command_leaderboard(args):
 
 def command_archive(args):
     evaluation = int(args.evaluation)
-    evaluationName = {5821575:"DARPA-SC1",5821583:"DARPA-SC2",5821621:"DARPA-SC3"}
+    evaluationName = {5821575:"RV-SC1",5821583:"RV-SC2",5821621:"RV-SC3"}
     create_leaderboard_table(evaluation, conf.leaderboard_columns[evaluation], evaluationName[evaluation], "syn5641757", args.dry_run)
     #archive(args.evaluation, args.destination, name=args.name, query=args.query)
 
