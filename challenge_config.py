@@ -183,30 +183,30 @@ def score_1_2(submission, goldstandard, key):
     sub_stats = pd.DataFrame.from_dict({'predict':submission[challenge[key]], 'truth':goldstandard[challenge[key]]}, dtype='float64')
     sub_stats = sub_stats.sort_values(['predict'],ascending=False)
     true_auroc, true_aupr = getAUROC_PR(sub_stats)
-    #shuffled = dict()
-    #permute_times = 10000
-    #for i in xrange(permute_times):
-    #    np.random.shuffle(sub_stats['predict'].values)
-    #    sub_stats = sub_stats.reset_index()
-    #    del sub_stats['index']
-    #    shuffled[i] = sub_stats
+    shuffled = dict()
+    permute_times = 10000
+    for i in xrange(permute_times):
+       np.random.shuffle(sub_stats['predict'].values)
+       sub_stats = sub_stats.reset_index()
+       del sub_stats['index']
+       shuffled[i] = sub_stats
 
-    #mp = Pool(2)
-    #temp = mp.map(getAUROC_PR,shuffled.values())
-    #auroc_total = []
-    #aupr_total = []
-    #for auc, pr in temp:
-    #    auroc_total.append(auc)
-    #    aupr_total.append(pr)
+    mp = Pool(2)
+    temp = mp.map(getAUROC_PR,shuffled.values())
+    auroc_total = []
+    aupr_total = []
+    for auc, pr in temp:
+       auroc_total.append(auc)
+       aupr_total.append(pr)
 
-    #pVal_ROC = decimal.Decimal(sum(auroc_total >= np.float64(true_auroc))) / decimal.Decimal(permute_times+1)
-    #pVal_PR = decimal.Decimal(sum(aupr_total >= np.float64(true_aupr))) / decimal.Decimal(permute_times+1)
+    pVal_ROC = decimal.Decimal(sum(auroc_total >= np.float64(true_auroc))) / decimal.Decimal(permute_times+1)
+    pVal_PR = decimal.Decimal(sum(aupr_total >= np.float64(true_aupr))) / decimal.Decimal(permute_times+1)
 
     return(dict(AUROC = round(true_auroc,4), AUPR = round(true_aupr,4), 
-            #nAUROC_pVal = "{:.2e}".format(pVal_ROC), 
-            nAUROC_pVal = -1,
-            #nAUPR_pVal="{:.2e}".format(pVal_PR),
-            nAUPR_pVal = -1, 
+            nAUROC_pVal = "{:.2e}".format(pVal_ROC), 
+            #nAUROC_pVal = -1,
+            nAUPR_pVal="{:.2e}".format(pVal_PR),
+            #nAUPR_pVal = -1, 
             AUPRpVal_boolean= "NA", AUROCpVal_boolean="NA", finalRank=0),
             "Thank you for your submission. Your submission has been validated and scored. Stay tuned for results on the challenge site at the end of each challenge phase.")
 
@@ -217,18 +217,18 @@ def score_3(submission, goldstandard, key):
     goldstandard = goldstandard.sort_values('SUBJECTID')
     score = np.corrcoef(submission[challenge[key]],goldstandard[challenge[key]])[0, 1]
 
-    #total = []
-    #permute_times = 10000
-    #for i in xrange(permute_times):
-    #    np.random.shuffle(submission[challenge[key]].values)
-    #    temp = np.corrcoef(submission[challenge[key]],goldstandard[challenge[key]])[0, 1]
-    #    total.append(temp)
+    total = []
+    permute_times = 10000
+    for i in xrange(permute_times):
+       np.random.shuffle(submission[challenge[key]].values)
+       temp = np.corrcoef(submission[challenge[key]],goldstandard[challenge[key]])[0, 1]
+       total.append(temp)
 
-    #pVal = decimal.Decimal(sum(total >= score)) / decimal.Decimal(permute_times+1)
+    pVal = decimal.Decimal(sum(total >= score)) / decimal.Decimal(permute_times+1)
 
     return (dict(score=round(score,4), 
-                #pVal = "{:.2e}".format(pVal), 
-                pVal = -1,
+                pVal = "{:.2e}".format(pVal), 
+                #pVal = -1,
                 booleanpVal="NA", finalRank=0),
             "Thank you for your submission. Your submission has been validated and scored. Stay tuned for results on the challenge site at the end of each challenge phase.")
 
