@@ -210,7 +210,7 @@ def score(evaluation, dry_run=False):
     print "-" * 60
     sys.stdout.flush()
 
-    for submission, status in syn.getSubmissionBundles(evaluation, status='SCORED'):
+    for submission, status in syn.getSubmissionBundles(evaluation, status='VALIDATED'):
 
         status.status = "INVALID"
 
