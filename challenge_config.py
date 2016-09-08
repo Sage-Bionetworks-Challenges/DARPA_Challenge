@@ -177,10 +177,17 @@ def getAUROC_PR(sub_stats):
 def score_1_2(submission, goldstandard, key):
     goldstandard = pd.read_csv(goldstandard)
     submission = pd.read_csv(submission)
-    submission = submission.sort_values('SUBJECTID')
-    goldstandard = goldstandard.sort_values('SUBJECTID')
+    submission['pred'] = submission[challenge[key]]
+    goldstandard['truth'] = goldstandard[challenge[key]]
 
-    sub_stats = pd.DataFrame.from_dict({'predict':submission[challenge[key]], 'truth':goldstandard[challenge[key]]}, dtype='float64')
+    if submission.columns.values[0] == '\xef\xbb\xbfSUBJECTID':
+        submission.columns.values[0] = 'SUBJECTID'
+    #submission = submission.sort('SUBJECTID')
+    #goldstandard = goldstandard.sort('SUBJECTID')
+    data = submission.merge(goldstandard, left_on="SUBJECTID", right_on="SUBJECTID", how="outer")
+
+    sub_stats = pd.DataFrame.from_dict({'predict':data['pred'], 'truth':data['truth']}, dtype='float64')
+
     sub_stats = sub_stats.sort_values(['predict'],ascending=False)
     true_auroc, true_aupr = getAUROC_PR(sub_stats)
     shuffled = dict()
