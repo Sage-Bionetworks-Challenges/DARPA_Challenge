@@ -254,38 +254,38 @@ evaluation_queue_by_id = {q['id']:q for q in evaluation_queues}
 
 ## define the default set of columns that will make up the leaderboard
 LEADERBOARD_COLUMNS = [
-    dict(name='objectId',      display_name='ID',      columnType='STRING', maximumSize=20),
-    dict(name='userId',        display_name='User',    columnType='STRING', maximumSize=20, renderer='userid'),
-    dict(name='entityId',      display_name='Entity',  columnType='STRING', maximumSize=20, renderer='synapseid'),
-    dict(name='versionNumber', display_name='Version', columnType='INTEGER'),
-    dict(name='name',          display_name='Name',    columnType='STRING', maximumSize=240),
-    dict(name='team',          display_name='Team',    columnType='STRING', maximumSize=240)]
+    Column(name='objectId',      display_name='ID',      columnType='STRING', maximumSize=20),
+    Column(name='userId',        display_name='User',    columnType='STRING', maximumSize=20, renderer='userid'),
+    Column(name='entityId',      display_name='Entity',  columnType='STRING', maximumSize=20, renderer='synapseid'),
+    Column(name='versionNumber', display_name='Version', columnType='INTEGER'),
+    Column(name='name',          display_name='Name',    columnType='STRING', maximumSize=240),
+    Column(name='team',          display_name='Team',    columnType='STRING', maximumSize=240)]
 
 ## Here we're adding columns for the output of our scoring functions, score,
 ## rmse and auc to the basic leaderboard information. In general, different
 ## questions would typically have different scoring metrics.
 leaderboard_columns = {}
 leaderboard_columns[5821575] = LEADERBOARD_COLUMNS + [
-    dict(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
-    dict(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
-    dict(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
-    dict(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
+    Column(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
+    Column(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
+    Column(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
+    Column(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
 
 leaderboard_columns[5821583] = leaderboard_columns[5821575]
 leaderboard_columns[5821621] = LEADERBOARD_COLUMNS + [
-    dict(name='score',         display_name='Correlation',   columnType='DOUBLE'),
-    dict(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
+    Column(name='score',         display_name='Correlation',   columnType='DOUBLE'),
+    Column(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
 
 leaderboard_columns[7991328] = LEADERBOARD_COLUMNS + [
-    dict(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
-    dict(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
-    dict(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
-    dict(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
+    Column(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
+    Column(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
+    Column(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
+    Column(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
 
 leaderboard_columns[7991330] = leaderboard_columns[7991328]
 leaderboard_columns[7991332] = LEADERBOARD_COLUMNS + [
-    dict(name='score',         display_name='Correlation',   columnType='DOUBLE'),
-    dict(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
+    Column(name='score',         display_name='Correlation',   columnType='DOUBLE'),
+    Column(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
 ## map each evaluation queues to the synapse ID of a table object
 ## where the table holds a leaderboard for that question
 leaderboard_tables = {}
