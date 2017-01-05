@@ -266,26 +266,26 @@ LEADERBOARD_COLUMNS = [
 ## questions would typically have different scoring metrics.
 leaderboard_columns = {}
 leaderboard_columns[5821575] = LEADERBOARD_COLUMNS + [
-    Column(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
-    Column(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
-    Column(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
-    Column(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
+    dict(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
+    dict(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
+    dict(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
+    dict(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
 
 leaderboard_columns[5821583] = leaderboard_columns[5821575]
 leaderboard_columns[5821621] = LEADERBOARD_COLUMNS + [
-    Column(name='score',         display_name='Correlation',   columnType='DOUBLE'),
-    Column(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
+    dict(name='score',         display_name='Correlation',   columnType='DOUBLE'),
+    dict(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
 
 leaderboard_columns[7991328] = LEADERBOARD_COLUMNS + [
-    Column(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
-    Column(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
-    Column(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
-    Column(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
+    dict(name='AUPR',         display_name='AUPR',   columnType='DOUBLE'),
+    dict(name='AUROC',          display_name='AUROC',    columnType='DOUBLE'),
+    dict(name='nAUPR_pVal',           display_name='nAUPR_pVal',     columnType='DOUBLE'),
+    dict(name='nAUROC_pVal',           display_name='nAUROC_pVal',     columnType='DOUBLE')]
 
 leaderboard_columns[7991330] = leaderboard_columns[7991328]
 leaderboard_columns[7991332] = LEADERBOARD_COLUMNS + [
-    Column(name='score',         display_name='Correlation',   columnType='DOUBLE'),
-    Column(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
+    dict(name='score',         display_name='Correlation',   columnType='DOUBLE'),
+    dict(name='pVal',          display_name='pVal',    columnType='DOUBLE')]
 ## map each evaluation queues to the synapse ID of a table object
 ## where the table holds a leaderboard for that question
 leaderboard_tables = {}
