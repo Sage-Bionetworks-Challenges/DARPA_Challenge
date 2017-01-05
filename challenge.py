@@ -590,7 +590,7 @@ def command_rank(args):
     # evaluationFunc = {5821575:SC1_2_ranking,5821583:SC1_2_ranking,5821621:SC3_ranking}
     # eval_synId = {5821575:"syn7205099",5821583:"syn7205140",5821621:"syn7205142"}
     evaluationFunc = {7991328:SC1_2_ranking,7991330:SC1_2_ranking,7991332:SC3_ranking}
-    eval_synId = {7991328:"syn7205099",7991330:"syn7205140",7991332:"syn7205142"}
+    eval_synId = {7991328:"syn7992323",7991330:"syn7992305",7991332:"syn7992324"}
     #eval_functions = evaluationFunc[evaluation]
     evaluationFunc[evaluation](eval_synId[evaluation])
     #SC1_2_ranking("syn6088407")
