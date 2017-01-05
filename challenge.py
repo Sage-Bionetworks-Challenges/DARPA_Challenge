@@ -310,7 +310,7 @@ def score(evaluation, dry_run=False):
 def create_leaderboard_table(evaluation,cols,name,parent, dry_run=False):
     temp = syn.query('select id,name from table where projectId == "%s" and name == "%s"' % (parent,name))
     if temp['totalNumberOfResults'] == 0:
-        schema = syn.store(Schema(name=name, columns=cols, parent=project))
+        schema = syn.store(Schema(name=name, columns=cols, parent=parent))
     else:
         schema = syn.get(temp['results'][0]['table.id'])
     temp = syn.tableQuery('select * from %s' % schema.id)
