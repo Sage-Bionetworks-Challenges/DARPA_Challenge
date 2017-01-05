@@ -32,7 +32,7 @@ def validate(submission, goldstandard, key):
     try:
         submission = pd.read_csv(submission)
     except Exception as e:
-        raise ValueError("Submitted file must be a comma-delimited file")
+        raise AssertionError("Submitted file must be a comma-delimited file")
     #FIX BYTE CASE
     if submission.columns.values[0] == '\xef\xbb\xbfSUBJECTID':
         submission.columns.values[0] = 'SUBJECTID'
@@ -240,10 +240,14 @@ def score_3(submission, goldstandard, key):
             "Thank you for your submission. Your submission has been validated and scored. Stay tuned for results on the challenge site at the end of each challenge phase.")
 
 
+# evaluation_queues = [
+# dict(id = 5821575,q='1'), 
+# dict(id = 5821583,q='2'), 
+# dict(id = 5821621,q='3')]  
 evaluation_queues = [
-dict(id = 5821575,q='1'), 
-dict(id = 5821583,q='2'), 
-dict(id = 5821621,q='3')]  
+dict(id = 7991328,q='1'), 
+dict(id = 7991330,q='2'), 
+dict(id = 7991332,q='3')]  
 
 
 evaluation_queue_by_id = {q['id']:q for q in evaluation_queues}
@@ -281,27 +285,37 @@ config_evaluations = [
 
     ## Q1
     {
-        'id':5821575,
+        #'id':5821575,
+        'id':7991328,
         'validation_function': validate,
         'scoring_function': score_1_2,
-        'key': 'challenge1'
+        'key': 'challenge1',
+        'leaderboard':os.path.join("goldstandards",'IDResilienceChallenge_GoldStandard_SHEDDING_SC1.csv'),
+        'test':os.path.join("goldstandards",'IDResilienceChallenge_GoldStandard_test_SHEDDING_SC1.csv')
 
     },
     ##Q2
     {
-        'id':5821583,
+        #'id':5821583,
+        'id':7991330,
         'validation_function': validate,
         'scoring_function': score_1_2,
-        'key': 'challenge2'
+        'key': 'challenge2',
+        'leaderboard':os.path.join("goldstandards",'IDResilienceChallenge_GoldStandard_SYMPTOMATIC_SC2.csv'),
+        'test':os.path.join("goldstandards",'IDResilienceChallenge_GoldStandard_test_SYMPTOMATIC_SC2.csv')
 
 
     },
     ##Q3
     {
-        'id':5821621,
+        #'id':5821621,
+        'id':7991332,
         'validation_function': validate,
         'scoring_function': score_3,
-        'key': 'challenge3'
+        'key': 'challenge3',
+        'leaderboard':os.path.join("goldstandards",'IDResilienceChallenge_GoldStandard_LOGSYMPTSCORE_SC3.csv'),
+        'test':os.path.join("goldstandards",'IDResilienceChallenge_GoldStandard_test_LOGSYMPTSCORE_SC3.csv')
+
 
     }
 
@@ -318,12 +332,12 @@ def validate_submission(evaluation, submission):
     """
     config = config_evaluations_map[int(evaluation.id)]
     validation_func = config['validation_function']
-    template_location = "goldstandards"
-    goldstandard = {'challenge1':os.path.join(template_location,'IDResilienceChallenge_SubmissionTemplate_SHEDDING_SC1.csv'),
-            'challenge2':os.path.join(template_location,'IDResilienceChallenge_SubmissionTemplate_SYMPTOMATIC_SC2.csv'),
-            'challenge3':os.path.join(template_location,'IDResilienceChallenge_SubmissionTemplate_LOGSYMPTSCORE_SC3.csv')}
-   
-    results = validation_func(submission.filePath,goldstandard[config['key']],config['key'])
+    # template_location = "goldstandards"
+    # goldstandard = {'challenge1':os.path.join(template_location,'IDResilienceChallenge_SubmissionTemplate_SHEDDING_SC1.csv'),
+    #         'challenge2':os.path.join(template_location,'IDResilienceChallenge_SubmissionTemplate_SYMPTOMATIC_SC2.csv'),
+    #         'challenge3':os.path.join(template_location,'IDResilienceChallenge_SubmissionTemplate_LOGSYMPTSCORE_SC3.csv')}
+
+    results = validation_func(submission.filePath,config['test'],config['key'])
 
     return results, "Looks OK to me!"
 
@@ -338,12 +352,12 @@ def score_submission(evaluation, submission):
     config = config_evaluations_map[int(evaluation.id)]
     score_func = config['scoring_function']
 
-    template_location = "goldstandards"
-    goldstandard = {'challenge1':os.path.join(template_location,'IDResilienceChallenge_GoldStandard_SHEDDING_SC1.csv'),
-            'challenge2':os.path.join(template_location,'IDResilienceChallenge_GoldStandard_SYMPTOMATIC_SC2.csv'),
-            'challenge3':os.path.join(template_location,'IDResilienceChallenge_GoldStandard_LOGSYMPTSCORE_SC3.csv')}
+    # template_location = "goldstandards"
+    # goldstandard = {'challenge1':os.path.join(template_location,'IDResilienceChallenge_GoldStandard_SHEDDING_SC1.csv'),
+    #         'challenge2':os.path.join(template_location,'IDResilienceChallenge_GoldStandard_SYMPTOMATIC_SC2.csv'),
+    #         'challenge3':os.path.join(template_location,'IDResilienceChallenge_GoldStandard_LOGSYMPTSCORE_SC3.csv')}
 
-    results = score_func(submission.filePath,goldstandard[config['key']],config['key'])
+    results = score_func(submission.filePath,config['test'],config['key'])
 
     return results
 
