@@ -587,8 +587,10 @@ def command_score(args):
 
 def command_rank(args):
     evaluation = int(args.evaluation)
-    evaluationFunc = {5821575:SC1_2_ranking,5821583:SC1_2_ranking,5821621:SC3_ranking}
-    eval_synId = {5821575:"syn7205099",5821583:"syn7205140",5821621:"syn7205142"}
+    # evaluationFunc = {5821575:SC1_2_ranking,5821583:SC1_2_ranking,5821621:SC3_ranking}
+    # eval_synId = {5821575:"syn7205099",5821583:"syn7205140",5821621:"syn7205142"}
+    evaluationFunc = {7991328:SC1_2_ranking,7991330:SC1_2_ranking,7991332:SC3_ranking}
+    eval_synId = {7991328:"syn7205099",7991330:"syn7205140",7991332:"syn7205142"}
     #eval_functions = evaluationFunc[evaluation]
     evaluationFunc[evaluation](eval_synId[evaluation])
     #SC1_2_ranking("syn6088407")
@@ -613,7 +615,8 @@ def command_leaderboard(args):
 
 def command_archive(args):
     evaluation = int(args.evaluation)
-    evaluationName = {5821575:"RV-SC1",5821583:"RV-SC2",5821621:"RV-SC3"}
+    #evaluationName = {5821575:"RV-SC1",5821583:"RV-SC2",5821621:"RV-SC3"}
+    evaluationName = {7991328:"RV-SC1_test",7991330:"RV-SC2_test",7991332:"RV-SC3_test"}
     create_leaderboard_table(evaluation, conf.leaderboard_columns[evaluation], evaluationName[evaluation], "syn5641757", args.dry_run)
     #archive(args.evaluation, args.destination, name=args.name, query=args.query)
 
