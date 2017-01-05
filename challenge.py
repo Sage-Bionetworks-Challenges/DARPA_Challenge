@@ -21,7 +21,7 @@ import synapseclient.utils as utils
 from synapseclient.exceptions import *
 from synapseclient import Activity
 from synapseclient import Project, Folder, File
-from synapseclient import Evaluation, Submission, SubmissionStatus
+from synapseclient import Evaluation, Submission, SubmissionStatus, Schema
 from synapseclient import Wiki
 from synapseclient import Column
 from synapseclient.dict_object import DictObject
