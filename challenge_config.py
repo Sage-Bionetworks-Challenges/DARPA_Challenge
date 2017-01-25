@@ -47,10 +47,10 @@ def validate(submission, goldstandard, key):
     assert all(~submission.duplicated('SUBJECTID')), 'No duplicate SUBJECTID allowed.\nDuplicated values=%s' % ','.join(submission[submission.duplicated('SUBJECTID')]['SUBJECTID'])
 
     #CHECK: Must contain SUBJECTIDs that exist in the template
-    assert all(submission['SUBJECTID'].isin(goldstandard['SUBJECTID'])), 'Must have all SUBJECTIDs.\n%s not part of template SUBJECTIDs' % ','.join(submission[~submission['SUBJECTID'].isin(goldstandard['SUBJECTID'])]['SUBJECTID'])
+    assert all(submission['SUBJECTID'].isin(goldstandard['SUBJECTID'])), 'All SUBJECTIDs in your prediction file must also be in the template.\n%s not part of template SUBJECTIDs' % ','.join(submission[~submission['SUBJECTID'].isin(goldstandard['SUBJECTID'])]['SUBJECTID'])
 
     #CHECK: Must contain all SUBJECTIDs
-    assert all(goldstandard['SUBJECTID'].isin(submission['SUBJECTID'])), "Can't have SUBJECTIDs that don't exist in the template.\nYou are missing %s" % ','.join(goldstandard[~goldstandard['SUBJECTID'].isin(submission['SUBJECTID'])])
+    assert all(goldstandard['SUBJECTID'].isin(submission['SUBJECTID'])), "You have missing SUBJECTIDs.\nYou are missing %s" % ','.join(goldstandard['SUBJECTID'][~goldstandard['SUBJECTID'].isin(submission['SUBJECTID'])])
 
     #CHECK: No NA values allowed
     assert sum(submission[challenge[key]].isnull())==0, 'NA values are not allowed'
@@ -156,7 +156,6 @@ def getAUROC_PR(sub_stats):
     
     precision, recall,  fpr, threshold = sub_stats.precision, sub_stats.recall, sub_stats.fpr, sub_stats.predict 
     tpr = recall #(Recall and True positive rates are same)
-    roc_auc = auc(fpr,tpr,reorder=True)
 
     #PR curve AUC (Fixes error when prediction == truth)
     recall_new=list(recall)
@@ -168,7 +167,8 @@ def getAUROC_PR(sub_stats):
     precision_new.reverse()
     precision_new.append(precision_new[len(precision_new)-1])
     precision_new.reverse()
-
+    
+    roc_auc = auc(fpr,recall_new,reorder=True)
     PR_auc = auc(recall_new, precision_new,reorder=True)
     #results = [ round(x,4) for x in results]
     return(roc_auc,PR_auc)
