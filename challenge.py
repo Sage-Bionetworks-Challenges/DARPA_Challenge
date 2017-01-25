@@ -21,7 +21,7 @@ import synapseclient.utils as utils
 from synapseclient.exceptions import *
 from synapseclient import Activity
 from synapseclient import Project, Folder, File
-from synapseclient import Evaluation, Submission, SubmissionStatus
+from synapseclient import Evaluation, Submission, SubmissionStatus, Schema
 from synapseclient import Wiki
 from synapseclient import Column
 from synapseclient.dict_object import DictObject
@@ -89,6 +89,21 @@ def get_user_name(profile):
         names.append(profile['userName'])
     return " ".join(names)
 
+def update_single_submission_status(status, add_annotations):
+    for keys in add_annotations:
+        if status.get("annotations") is not None:
+            if status.annotations.get(keys) is not None:
+                for annots in add_annotations[keys]:
+                    total_annots = filter(lambda input: input.get('key', None) == annots['key'], status.annotations[keys])
+                    if len(total_annots) == 1:
+                        total_annots[0]['value'] = annots['value']
+                    else:
+                        status.annotations[keys].extend([annots])
+            else:
+                status.annotations[keys] = add_annotations[keys]
+        else:
+            status.annotations = add_annotations
+    return(status)
 
 def update_submissions_status_batch(evaluation, statuses):
     """
@@ -178,6 +193,10 @@ def validate(evaluation, dry_run=False):
             validation_message = str(ex1)
 
         status.status = "VALIDATED" if is_valid else "INVALID"
+        if not is_valid:
+            failure_reason = {"FAILURE_REASON":validation_message}
+            add_annotations = synapseclient.annotations.to_submission_status_annotations(failure_reason,is_private=True)
+            status = update_single_submission_status(status, add_annotations)
 
         if not dry_run:
             status = syn.store(status)
@@ -192,9 +211,16 @@ def validate(evaluation, dry_run=False):
                 submission_id=submission.id,
                 submission_name=submission.name)
         else:
+            if isinstance(ex1, AssertionError):
+                sendTo = [submission.userId]
+                username = get_user_name(profile)
+            else:
+                sendTo = conf.ADMIN_USER_IDS
+                username = "Challenge Administrator"
+
             messages.validation_failed(
-                userIds=[submission.userId],
-                username=get_user_name(profile),
+                userIds= sendTo,
+                username=username,
                 queue_name=evaluation.name,
                 submission_id=submission.id,
                 submission_name=submission.name,
@@ -235,8 +261,9 @@ def score(evaluation, dry_run=False):
                 score['team'] = get_user_name(profile)
             else:
                 score['team'] = '?'
+            add_annotations = synapseclient.annotations.to_submission_status_annotations(score,is_private=True)
+            status = update_single_submission_status(status, add_annotations)
 
-            status.annotations = synapseclient.annotations.to_submission_status_annotations(score,is_private=True)
             status.status = "SCORED"
             ## if there's a table configured, update it
             if not dry_run and evaluation.id in conf.leaderboard_tables:
@@ -270,9 +297,9 @@ def score(evaluation, dry_run=False):
                 submission_id=submission.id)
         else:
             messages.scoring_error(
-                userIds=[submission.userId],
+                userIds=conf.ADMIN_USER_IDS,
                 message=message,
-                username=get_user_name(profile),
+                username="Challenge Administrator,",
                 queue_name=evaluation.name,
                 submission_name=submission.name,
                 submission_id=submission.id)
@@ -283,7 +310,7 @@ def score(evaluation, dry_run=False):
 def create_leaderboard_table(evaluation,cols,name,parent, dry_run=False):
     temp = syn.query('select id,name from table where projectId == "%s" and name == "%s"' % (parent,name))
     if temp['totalNumberOfResults'] == 0:
-        schema = syn.store(Schema(name=name, columns=cols, parent=project))
+        schema = syn.store(Schema(name=name, columns=cols, parent=parent))
     else:
         schema = syn.get(temp['results'][0]['table.id'])
     temp = syn.tableQuery('select * from %s' % schema.id)
@@ -560,8 +587,10 @@ def command_score(args):
 
 def command_rank(args):
     evaluation = int(args.evaluation)
-    evaluationFunc = {5821575:SC1_2_ranking,5821583:SC1_2_ranking,5821621:SC3_ranking}
-    eval_synId = {5821575:"syn7205099",5821583:"syn7205140",5821621:"syn7205142"}
+    # evaluationFunc = {5821575:SC1_2_ranking,5821583:SC1_2_ranking,5821621:SC3_ranking}
+    # eval_synId = {5821575:"syn7205099",5821583:"syn7205140",5821621:"syn7205142"}
+    evaluationFunc = {7991328:SC1_2_ranking,7991330:SC1_2_ranking,7991332:SC3_ranking}
+    eval_synId = {7991328:"syn7992323",7991330:"syn7992305",7991332:"syn7992324"}
     #eval_functions = evaluationFunc[evaluation]
     evaluationFunc[evaluation](eval_synId[evaluation])
     #SC1_2_ranking("syn6088407")
@@ -586,7 +615,8 @@ def command_leaderboard(args):
 
 def command_archive(args):
     evaluation = int(args.evaluation)
-    evaluationName = {5821575:"RV-SC1",5821583:"RV-SC2",5821621:"RV-SC3"}
+    #evaluationName = {5821575:"RV-SC1",5821583:"RV-SC2",5821621:"RV-SC3"}
+    evaluationName = {7991328:"RV-SC1_test",7991330:"RV-SC2_test",7991332:"RV-SC3_test"}
     create_leaderboard_table(evaluation, conf.leaderboard_columns[evaluation], evaluationName[evaluation], "syn5641757", args.dry_run)
     #archive(args.evaluation, args.destination, name=args.name, query=args.query)
 

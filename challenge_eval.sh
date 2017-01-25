@@ -15,11 +15,20 @@ python challenge.py -u DARPA --send-messages --notifications score --all >> log/
 #--------------------
 #Archive and Rank
 #--------------------
-python challenge.py archive 5821575
-python challenge.py rank 5821575
+# python challenge.py archive 5821575
+# python challenge.py rank 5821575
 
-python challenge.py archive 5821583
-python challenge.py rank 5821583
+# python challenge.py archive 5821583
+# python challenge.py rank 5821583
 
-python challenge.py archive 5821621
-python challenge.py rank 5821621
+# python challenge.py archive 5821621
+# python challenge.py rank 5821621
+
+# python challenge.py archive 7991328
+# python challenge.py rank 7991328
+
+# python challenge.py archive 7991330
+# python challenge.py rank 7991330
+
+# python challenge.py archive 7991332
+# python challenge.py rank 7991332
