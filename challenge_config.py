@@ -185,7 +185,8 @@ def score_1_2(submission, goldstandard, key):
     #submission = submission.sort('SUBJECTID')
     #goldstandard = goldstandard.sort('SUBJECTID')
     data = submission.merge(goldstandard, left_on="SUBJECTID", right_on="SUBJECTID", how="outer")
-
+    #remove rows with null truth values
+    data = data[~data['truth'].isnull()]
     sub_stats = pd.DataFrame.from_dict({'predict':data['pred'], 'truth':data['truth']}, dtype='float64')
 
     sub_stats = sub_stats.sort_values(['predict'],ascending=False)
