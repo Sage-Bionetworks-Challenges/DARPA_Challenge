@@ -156,7 +156,7 @@ def getAUROC_PR(sub_stats):
     
     precision, recall,  fpr, threshold = sub_stats.precision, sub_stats.recall, sub_stats.fpr, sub_stats.predict 
     tpr = recall #(Recall and True positive rates are same)
-
+    roc_auc = auc(fpr,tpr,reorder=True)
     #PR curve AUC (Fixes error when prediction == truth)
     recall_new=list(recall)
     precision_new=list(precision)
@@ -168,7 +168,6 @@ def getAUROC_PR(sub_stats):
     precision_new.append(precision_new[len(precision_new)-1])
     precision_new.reverse()
     
-    roc_auc = auc(fpr,recall_new,reorder=True)
     PR_auc = auc(recall_new, precision_new,reorder=True)
     #results = [ round(x,4) for x in results]
     return(roc_auc,PR_auc)
