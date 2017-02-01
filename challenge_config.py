@@ -43,6 +43,12 @@ def validate(submission, goldstandard, key):
     #CHECK: SHEDDING_SC1, SYMPTOMATIC_SC2, LOGSYMPTSCORE_SC3 columns must exist for respective challenge
     assert challenge[key] in submission, '%s must be one of the column headers for %s\nYour column headers= %s' % (challenge[key],key,','.join(list(submission.columns)))
 
+    #CHECK: No NA values allowed
+    assert sum(submission[challenge[key]].isnull())==0, 'NA values are not allowed'
+
+    #CHECK: No NA subjectIds allowed
+    assert sum(submission['SUBJECTID'].isnull())==0, 'NA subjectIds are not allowed'
+
     #CHECK: No duplicate SUBJECTIDs allowed
     assert all(~submission.duplicated('SUBJECTID')), 'No duplicate SUBJECTID allowed.\nDuplicated values=%s' % ','.join(submission[submission.duplicated('SUBJECTID')]['SUBJECTID'])
 
@@ -51,9 +57,6 @@ def validate(submission, goldstandard, key):
 
     #CHECK: Must contain all SUBJECTIDs
     assert all(goldstandard['SUBJECTID'].isin(submission['SUBJECTID'])), "You have missing SUBJECTIDs.\nYou are missing %s" % ','.join(goldstandard['SUBJECTID'][~goldstandard['SUBJECTID'].isin(submission['SUBJECTID'])])
-
-    #CHECK: No NA values allowed
-    assert sum(submission[challenge[key]].isnull())==0, 'NA values are not allowed'
 
     #CHECK: submissions must be all NA
     assert submission[challenge[key]].dtype == 'float64' or submission[challenge[key]].dtype == 'int64','Submissions must be numerical values'
