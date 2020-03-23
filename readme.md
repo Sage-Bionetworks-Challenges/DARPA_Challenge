@@ -3,39 +3,7 @@
 Challenge Template for Python
 =============================
 
-For those writing Synapse challenge scoring applications in Python, these scripts should serve as a starting point giving working examples of many of the tasks typical to running a challenge on Synapse. [Creating a Challenge Space in Synapse](https://www.synapse.org/#!Synapse:syn2453886) is a step-by-step guide to building out a challenge.
-
-## Creating a scoring script
-
-Starting with the scripts in this folder, simple challenges can be created just by editing **challenge_config.py** and **messages.py**. You'll need to add an evaluation queue for each question in your challenge and write appropriate validation and scoring functions. Then, customize the messages with challenge specific help for your solvers.
-
-## Example
-
-To create an example challenge:
-
-    python challenge_demo.py demo --no-cleanup
-
-This will create a challenge project with an example wiki and an evaluation queue. Several test files are then submitted to the challenge, which are then validated and scored. The demo command also creates **challenge_config.py** based on **challenge_config.template.py**. You'll need to configure scoring functions and other settings in this file to customize scoring to your own challenge questions.
-
-The challenge.py script has several subcommands that help administrate a challenge. To see all the commands, type:
-
-    python challenge.py -h
-
-To list all submissions to a challenge:
-
-    python challenge.py list [evaluation ID]
-
-All the submissions have been scored at this point. If we wanted to rescore, we could reset the status of a submission:
-
-    python challenge.py reset --status RECEIVED [submission ID]
-
-### Messages and Notifications
-
-The script can send several types of messages, which are configured in **messages.py**. The *--send-messages*
-flag instructs the script to email the submitter when a submission fails validation or gets scored. The
-*--notifications* flag sends error messages to challenge administrators, whose synapse user IDs must be
-added to **challenge_config.py**. The flag *--acknowledge-receipt* is used when there will be a lag between
-submission and scoring to let users know their submission has been received and passed validation.
+For those writing Synapse challenge scoring applications in Python, these scripts should serve as a starting point giving working examples of many of the tasks typical to running a challenge on Synapse. [Creating a Challenge Space in Synapse](http://docs.synapse.org/articles/challenge_administration.html) is a step-by-step guide to building out a challenge.
 
 ### Validation and Scoring
 
@@ -51,19 +19,8 @@ OK, assuming that went well, now let's score for real:
 
     python challenge.py --send-messages --notifications score [evaluation ID]
 
-Go to the challenge project in Synapse and take a look around. You will find a leaderboard in the wikis and also a Synapse table that mirrors the contents of the leaderboard. The script can output the leaderboard in .csv format:
 
-    python challenge.py leaderboard [evaluation ID]
-
-The demo script tags the challenge project and other assets with a UUID to ensure that they are uniquely
-names. Use the UUID to delete the example and clean up associated resources:
-
-    python challenge_demo.py cleanup [UUID]
-
-### RPy2
-Often it's more convenient to write statistical code in R. We've successfully used the [Rpy2](http://rpy.sourceforge.net/) library to pass file paths to scoring functions written in R and get back a named list of scoring statistics. Alternatively, there's R code included in the R folder of this repo to fully run a challenge in R.
-
-## Setting Up Automatic Validation and Scoring on an EC2
+### Setting Up Automatic Validation and Scoring on an EC2
 
 Make sure challenge_config.py is set up properly and all the files in this repository are in one directory on the EC2.  Crontab is used to help run the validation and scoring command automatically.  To set up crontab, first open the crontab configuration file:
 
